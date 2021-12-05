@@ -64,7 +64,7 @@ cp -r ~/.local/share/jupyter/kernels/julia-$julia_version_short /opt/tljh/user/s
 julia --project=$julia_global_env -e 'deleteat!(DEPOT_PATH, [1,3]); using Pkg; Pkg.update(); Pkg.add("Plots"); Pkg.precompile()'
 
 # Make sure that MTH229 is available
-julia --project=$julia_global_env -e 'deleteat!(DEPOT_PATH, [1,3]); using Pkg; Pkg.add(PackageSpec(url="https://github.com/mth229/MTH229.jl"))'
+julia --project=$julia_global_env -e 'deleteat!(DEPOT_PATH, [1,3]); using Pkg; Pkg.add(PackageSpec(url="https://github.com/mth229/MTH229.jl")); Pkg.update()'
 # Then install it
 julia --project=$julia_global_env -e 'deleteat!(DEPOT_PATH, [1,3]); using Pkg; Pkg.update(); Pkg.add("MTH229"); Pkg.precompile()'
 
