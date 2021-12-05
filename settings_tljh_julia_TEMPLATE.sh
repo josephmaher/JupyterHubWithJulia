@@ -11,7 +11,7 @@ export domain=
 export hostname=
 
 export fqdn=$hostname.$domain
-export timezone="Europe/Zurich"
+export timezone="Americas/New_York"
 
 ## HTTPS setup, one of: none, self-cert, existing-cert, letsencrypt
 #############
