@@ -47,14 +47,14 @@ if [ -f "/root/.ssh/authorized_keys" ]; then
 fi
 
 ## Firewall
-apt install ufw
-ufw default allow outgoing
-ufw default deny incoming
-ufw limit ssh
-ufw allow https
-ufw allow http
+#apt install ufw
+#ufw default allow outgoing
+#ufw default deny incoming
+#ufw limit ssh
+#ufw allow https
+#ufw allow http
 # ufw enable
-yes | ufw enable
+#yes | ufw enable
 
 ##################################
 ## The Littlest JupyterHub install
