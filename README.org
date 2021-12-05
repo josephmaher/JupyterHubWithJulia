@@ -17,7 +17,7 @@ will mess with settings you probably don't want messed with! For
 security reasons, this is also the recommendation from the TLJH-folks ([[https://tljh.jupyter.org/en/latest/install/custom-server.html][link]]).
 
 *TL;DR*
-- clone this repo to your server: ~git clone https://github.com/mauro3/JupyterHubWithJulia.git~
+- clone this repo to your server: ~git clone https://github.com/josephmaher/JupyterHubWithJulia.git~
 - copy ~settings_tljh_julia_TEMPLATE.sh~ to ~settings_tljh_julia.sh~
 - edit ~settings_tljh_julia.sh~ to your liking
 - optional but needed for HTTPS: give the server a domain name by setting
