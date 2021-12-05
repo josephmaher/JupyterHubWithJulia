@@ -147,6 +147,7 @@ tljh-config reload
 pip install numpy
 pip install matplotlib
 pip install scipy
+pip install sympy
 
 ./julia_install.sh $julia_version $julia_packages
 
