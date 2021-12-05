@@ -66,7 +66,7 @@ fi
 # follows https://tljh.jupyter.org/en/latest/install/custom-server.html
 
 ## Install dependencies
-apt install python3 python3-dev git curl nano screen wget -y
+apt install python3 python3-dev git curl nano screen wget zip unzip -y
 
 ## Install TLJH
 curl -L https://tljh.jupyter.org/bootstrap.py | python3 - --admin $jupyteradmin
