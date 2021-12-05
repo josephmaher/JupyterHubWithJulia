@@ -6,6 +6,10 @@
 # Make sure to create a settings_tljh_julia.sh from
 # settings_tljh_julia_TEMPLATE.sh?"
 
+# fix the path just in case
+
+PATH=$PATH:/sbin:/usr/sbin
+
 ## Settings
 # make sure settings file is there
 if [ ! -f "settings_tljh_julia.sh" ]; then
