@@ -71,6 +71,7 @@ julia --project=$julia_global_env -e 'deleteat!(DEPOT_PATH, [1,3]); using Pkg; P
 # now install the MTH229 projects in /etc/skel
 wget -O /etc/skel/master.zip  https://www.github.com/mth229/229-projects/archive/master.zip
 unzip /etc/skel/master.zip -d /etc/skel/
+rm /etc/skel/master.zip
 
 # Install more packages
 if [ ! -z "$julia_packages" ]
