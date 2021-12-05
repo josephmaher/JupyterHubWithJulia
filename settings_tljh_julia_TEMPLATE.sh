@@ -48,4 +48,4 @@ export julia_version="1.6.2"
 
 # Packages to be installed system-wide, separate entries with ":"
 # (IJulia gets installed irrespective)
-export julia_packages=
+export julia_packages=MTH229:Plots
