@@ -60,6 +60,10 @@ julia --project=$julia_global_env -e 'deleteat!(DEPOT_PATH, [1,3]); using Pkg; P
 # and make the kernel available to TLJH
 cp -r ~/.local/share/jupyter/kernels/julia-$julia_version_short /opt/tljh/user/share/jupyter/kernels/
 
+# Make sure that MTH229 is available
+julia --project=$julia_global_env -e 'deleteat!(DEPOT_PATH, [1,3]); using Pkg; Pkg.add(PackageSpec(url="https://github.com/mth229/MTH229.jl"))'
+
+
 # Install more packages
 if [ ! -z "$julia_packages" ]
 then
