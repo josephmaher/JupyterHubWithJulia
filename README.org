@@ -3,14 +3,37 @@
 Most of this due to [[https://github.com/mauro3][mauro3]], some additional edits for getting 
 [[https://github.com/mth229/MTH229.jl][MTH229]] installed.
 
-Notes on proxy / base_url settings:
+*Notes on proxy / base_url settings*
 
-To chnage the base_url (needed for proxying through another website) run this as root inside the container:
+To change the base_url (needed for proxying through another website) run this as root inside the container:
 
 ~tljh-config set base_url '/juliabox/'~
 ~tljh-config reload~
 
-The changes shoudl show up in ~/opt/tljh/config/config.yaml~
+The changes should show up in ~/opt/tljh/config/config.yaml~
+
+The apache forwarding settings that seem to work are:
+
+```
+ Define IP <whatever the ip of the machine running the container is>
+
+ RewriteEngine on
+
+ RewriteCond %{HTTP:Connection} Upgrade [NC]
+ RewriteCond %{HTTP:Upgrade} websocket [NC]
+ RewriteRule /juliabox/(.*) ws://${IP}:8001/juliabox/$1 [P,L]
+ RewriteRule /juliabox/(.*) http://${IP}:8001/juliabox/$1 [P,L]
+
+ <Location /juliabox> 
+ 
+ ProxyPreserveHost On
+ ProxyPass http://${IP}:8001/juliabox/
+ ProxyPassReverse http://${IP}:8001/juliabox/
+
+ </Location>
+```
+
+*Main notes*
 
 I sure took me some time to figure this one out.  [[https://tljh.jupyter.org/en/latest/index.html][The Littlest JupyterHub]]
 install itself was a breeze but the Julia side of things was not as it
