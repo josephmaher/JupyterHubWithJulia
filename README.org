@@ -14,24 +14,24 @@ The changes should show up in ~/opt/tljh/config/config.yaml~
 
 The apache forwarding settings that seem to work are:
 
-```
- Define IP <whatever the ip of the machine running the container is>
+#+begin_src
+Define IP <whatever the ip of the machine running the container is>
 
- RewriteEngine on
+RewriteEngine on
 
- RewriteCond %{HTTP:Connection} Upgrade [NC]
- RewriteCond %{HTTP:Upgrade} websocket [NC]
- RewriteRule /juliabox/(.*) ws://${IP}:8001/juliabox/$1 [P,L]
- RewriteRule /juliabox/(.*) http://${IP}:8001/juliabox/$1 [P,L]
+RewriteCond %{HTTP:Connection} Upgrade [NC]
+RewriteCond %{HTTP:Upgrade} websocket [NC]
+RewriteRule /juliabox/(.*) ws://${IP}:8001/juliabox/$1 [P,L]
+RewriteRule /juliabox/(.*) http://${IP}:8001/juliabox/$1 [P,L]
 
- <Location /juliabox> 
+<Location /juliabox> 
  
- ProxyPreserveHost On
- ProxyPass http://${IP}:8001/juliabox/
- ProxyPassReverse http://${IP}:8001/juliabox/
+ProxyPreserveHost On
+ProxyPass http://${IP}:8001/juliabox/
+ProxyPassReverse http://${IP}:8001/juliabox/
 
- </Location>
-```
+</Location>
+#+end_src
 
 *Main notes*
 
