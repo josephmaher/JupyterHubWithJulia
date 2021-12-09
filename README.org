@@ -7,8 +7,10 @@ Most of this due to [[https://github.com/mauro3][mauro3]], some additional edits
 
 To change the base_url (needed for proxying through another website) run this as root inside the container:
 
-~tljh-config set base_url '/juliabox/'~
-~tljh-config reload~
+#+begin_src
+tljh-config set base_url '/juliabox/'
+tljh-config reload
+#+end_src
 
 The changes should show up in ~/opt/tljh/config/config.yaml~
 
