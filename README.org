@@ -12,7 +12,7 @@ To change the base_url (needed for proxying through another website) run this as
 
 The changes should show up in ~/opt/tljh/config/config.yaml~
 
-The apache forwarding settings that seem to work are:
+The apache forwarding settings that seem to work are here, assuming the remote machine is running on port 8001:
 
 #+begin_src
 Define IP <whatever the ip of the machine running the container is>
