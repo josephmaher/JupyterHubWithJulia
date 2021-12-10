@@ -61,10 +61,10 @@ julia --project=$julia_global_env -e 'deleteat!(DEPOT_PATH, [1,3]); using Pkg; P
 cp -r ~/.local/share/jupyter/kernels/julia-$julia_version_short /opt/tljh/user/share/jupyter/kernels/
 
 # Install Plots
-julia --project=$julia_global_env -e 'deleteat!(DEPOT_PATH, [1,3]); using Pkg; Pkg.update(); Pkg.add("Plots"); Pkg.precompile()'
+julia --project=$julia_global_env -e 'deleteat!(DEPOT_PATH, [1,3]); using Pkg; Pkg.update(); Pkg.add("Plots"); Pkg.add("PlotlyBase"); Pkg.precompile()'
 
 # Make sure that MTH229 is available
-julia --project=$julia_global_env -e 'deleteat!(DEPOT_PATH, [1,3]); using Pkg; Pkg.add(PackageSpec(url="https://github.com/mth229/MTH229.jl")); Pkg.update()'
+julia --project=$julia_global_env -e 'deleteat!(DEPOT_PATH, [1,3]); using Pkg; Pkg.update(); Pkg.add(PackageSpec(url="https://github.com/mth229/MTH229.jl")); Pkg.update(); Pkg.precompile()'
 # Then install it
 julia --project=$julia_global_env -e 'deleteat!(DEPOT_PATH, [1,3]); using Pkg; Pkg.update(); Pkg.add("MTH229"); Pkg.precompile()'
 
