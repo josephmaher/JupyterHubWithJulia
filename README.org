@@ -3,40 +3,6 @@
 Most of this due to [[https://github.com/mauro3][mauro3]], some additional edits for getting 
 [[https://github.com/mth229/MTH229.jl][MTH229]] installed.
 
-*Notes on proxy / base_url settings*
-
-To change the base_url (needed for proxying through another website) run this as root inside the container:
-
-#+begin_src
-tljh-config set base_url '/juliabox/'
-tljh-config reload
-#+end_src
-
-The changes should show up in ~/opt/tljh/config/config.yaml~
-
-The apache forwarding settings that seem to work are here, assuming the remote machine is running on port 8001:
-
-#+begin_src
-Define IP <whatever the ip of the machine running the container is>
-
-RewriteEngine on
-
-RewriteCond %{HTTP:Connection} Upgrade [NC]
-RewriteCond %{HTTP:Upgrade} websocket [NC]
-RewriteRule /juliabox/(.*) ws://${IP}:8001/juliabox/$1 [P,L]
-RewriteRule /juliabox/(.*) http://${IP}:8001/juliabox/$1 [P,L]
-
-<Location /juliabox> 
- 
-ProxyPreserveHost On
-ProxyPass http://${IP}:8001/juliabox/
-ProxyPassReverse http://${IP}:8001/juliabox/
-
-</Location>
-#+end_src
-
-*Main notes*
-
 I sure took me some time to figure this one out.  [[https://tljh.jupyter.org/en/latest/index.html][The Littlest JupyterHub]]
 install itself was a breeze but the Julia side of things was not as it
 was tricky to find the documentation.  Thanks to @fredrikekre for the help!
@@ -87,7 +53,7 @@ throughout the install, so it is assumed that this file is sourced
 before executing the commands listed below (it is sourced
 automatically in ~tljh_install.sh~).
 
-* Linode (or any Ubutnu) server setup
+* Linode (or any Ubuntu) server setup
 Linode.com offers Linux servers in the cloud.  Currently there are
 quite a few $100-credit offers going around, that's why I started here.
 But I think the script should work on any Ubuntu 20.04 system.
@@ -135,6 +101,40 @@ Let's encrypt: [[https://www.linode.com/docs/guides/install-lets-encrypt-to-crea
   - apt install certbot
   - certbot certonly --standalone -d jhub.example.com
   - keys are in /etc/letencrypt
+
+
+*Notes on proxy / base_url settings*
+
+To change the base_url (needed for proxying through another website) run this as root inside the container:
+
+#+begin_src
+tljh-config set base_url '/juliabox/'
+tljh-config reload
+#+end_src
+
+The changes should show up in ~/opt/tljh/config/config.yaml~
+
+The apache forwarding settings that seem to work are here, assuming the remote machine is running on port 8001:
+
+#+begin_src
+Define IP <whatever the ip of the machine running the container is>
+
+RewriteEngine on
+
+RewriteCond %{HTTP:Connection} Upgrade [NC]
+RewriteCond %{HTTP:Upgrade} websocket [NC]
+RewriteRule /juliabox/(.*) ws://${IP}:8001/juliabox/$1 [P,L]
+RewriteRule /juliabox/(.*) http://${IP}:8001/juliabox/$1 [P,L]
+
+<Location /juliabox> 
+ 
+ProxyPreserveHost On
+ProxyPass http://${IP}:8001/juliabox/
+ProxyPassReverse http://${IP}:8001/juliabox/
+
+</Location>
+#+end_src
+
 
 
 ** The install
