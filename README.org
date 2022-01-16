@@ -103,7 +103,7 @@ Let's encrypt: [[https://www.linode.com/docs/guides/install-lets-encrypt-to-crea
   - keys are in /etc/letencrypt
 
 
-*Notes on proxy / base_url settings*
+*** Notes on proxy / base_url settings
 
 To change the base_url (needed for proxying through another website) run this as root inside the container:
 
