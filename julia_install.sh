@@ -58,7 +58,7 @@ touch $julia_global_env/Project.toml
 # Install IJulia
 julia --project=$julia_global_env -e 'deleteat!(DEPOT_PATH, [1,3]); using Pkg; Pkg.update(); Pkg.add("IJulia"); Pkg.precompile(); using IJulia; installkernel("Julia")'
 # and make the kernel available to TLJH
-#cp -r ~/.local/share/jupyter/kernels/julia-$julia_version_short /opt/tljh/user/share/jupyter/kernels/
+cp -r ~/.local/share/jupyter/kernels/julia-$julia_version_short /opt/tljh/user/share/jupyter/kernels/
 
 # Install Plots
 julia --project=$julia_global_env -e 'deleteat!(DEPOT_PATH, [1,3]); using Pkg; Pkg.update(); Pkg.add("Plots"); Pkg.add("PlotlyBase"); Pkg.precompile()'
