@@ -148,6 +148,7 @@ pip install numpy
 pip install matplotlib
 pip install scipy
 pip install sympy
+pip install plotly
 
 ./julia_install.sh $julia_version $julia_packages
 
