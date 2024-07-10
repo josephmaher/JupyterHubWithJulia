@@ -19,13 +19,13 @@ Assumptions:
 
 ## Create a new base image container
 
-The current base image container is `juliabox-20230110`.  If you want
+The current base image container is ~juliabox-20230110~.  If you want
 to update it, it's probably easiest to just start from scratch with a
-new container, called `juliabox-DATE below`:
+new container, called ~juliabox-DATE below~:
 
-```
+#+begin_src
 host# lxc launch ubuntu:22.04 juliabox-DATE
-```
+#+end_src
 
 Get a root shell in the container:
 
