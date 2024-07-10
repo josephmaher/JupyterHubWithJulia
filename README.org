@@ -15,9 +15,9 @@ Assumptions:
 
  - host and proxy are on the same vpn to protect unencrypted traffic between them
 
-# Notes on running juliabox on host
+** Notes on running juliabox on host
 
-## Create a new base image container
+*** Create a new base image container
 
 The current base image container is ~juliabox-20230110~.  If you want
 to update it, it's probably easiest to just start from scratch with a
@@ -29,37 +29,36 @@ host# lxc launch ubuntu:22.04 juliabox-DATE
 
 Get a root shell in the container:
 
-```
+#+begin_src
 host# lxc exec juliabox-DATE -- /bin/bash
-```
+#+end_src
 
 Now install julia etc, (full instructions here: [https://github.com/josephmaher/JupyterHubWithJulia](https://github.com/josephmaher/JupyterHubWithJulia)), as follows:
 
 Download the install scripts to the container:
 
-```
+#+begin_src
 juliabox# git clone https://github.com/josephmaher/JupyterHubWithJulia.git
 juliabox# cd JupyterHubWithJulia/
 juliabox# cp settings_tljh_julia_TEMPLATE.sh settings_tljh_julia.sh
-```
+#+end_src
 
-edit `settings_tljh_julia.sh` if needed
+edit ~settings_tljh_julia.sh~ if needed
 
 
-```
+#+begin_src
 ./tljh_install.sh
-
-```
+#+end_src
 
 This will download and install everything, may take about 10 minutes and requires some babysitting.
 
 
 With the current forwarding setup, you will need to set the base_url in the container:
 
-```
+#+begin_src
 juliabox# tljh-config set base_url '/juliabox-DATE/'
 juliabox# tljh-config reload
-```
+#+end_src
 
 Then edit the apache configuration for forwarding on both host and
 proxy (see below for details).
@@ -67,27 +66,27 @@ proxy (see below for details).
 Login and run all the projects and check that everything works.
 
 If you need to add/update/precompile packages, then something like
-this from `julia_install.sh` should work (change v1.9 to the current
-version of julia if you're using a different version of `julia`):
+this from ~julia_install.sh~ should work (change v1.9 to the current
+version of julia if you're using a different version of ~julia~):
 
-```
+#+begin_src
 export julia_global_depot=$(julia -e 'print(DEPOT_PATH[2])')
 export julia_global_env_dir=$(julia -e 'using Pkg; print(Pkg.envdir(DEPOT_PATH[2]))')
 export julia_global_env=$julia_global_env_dir/v1.9
 
 julia --project=$julia_global_env -e 'deleteat!(DEPOT_PATH, [1,3]); using Pkg; Pkg.update(); Pkg.add("MYPACKAGE"); Pkg.precompile()'
-```
+#+end_src
 
-The scripts will download the MTH229 projects into ```/etc/skel/```.
-Remove the ```*.toml``` files from the MTH229 projects tarball, otherwise
+The scripts will download the MTH229 projects into ~/etc/skel/~.
+Remove the ~*.toml~ files from the MTH229 projects tarball, otherwise
 there seem to be dependency issues...
 
 Once everything is working, for the admin user (or some other user)
-copy all of their files over to `/etc/skel/` and make sure they're all
-owned by `root:root` - newly created users will have the files in
-`/etc/skel/` copied across to their home directories.
+copy all of their files over to ~/etc/skel/~ and make sure they're all
+owned by ~root:root~ - newly created users will have the files in
+~/etc/skel/~ copied across to their home directories.
 
-Now you can copy the `juliabox-DATE` image to make containers for each
+Now you can copy the ~juliabox-DATE~ image to make containers for each
 section.  The new containers will inherit whaterever admin password
 you chose for the base container.
 
@@ -96,30 +95,30 @@ you chose for the base container.
 Probably best to have one container per section, so copy the base
 image to make a new container:
 
-```
+#+begin_src
 host# lxc copy juliabox-DATE juliabox-SECTION
 host# lxc start juliabox-SECTION
-```
+#+end_src
 
 You will need to set the base_url in the container:
 
-```
+#+begin_src
 host# lxc exec juliabox-SECTION -- /bin/bash
 juliabox# tljh-config set base_url '/juliabox-SECTION/'
 juliabox# tljh-config reload
-```
+#+end_src
 
 
-`lxc ls` which show you the list of current containers, and what IP
-addresses they have.  They have local IP addresses on `kolmogorov`, so
-you either need to proxy them with `apache2` on `kolmogorov`, or set
-up `openvpn` on the container.
+~lxc ls~ which show you the list of current containers, and what IP
+addresses they have.  They have local IP addresses on ~host~, so
+you either need to proxy them with ~apache2~ on ~host~, or set
+up ~openvpn~ on the container.
 
-## Set up the proxy on host
+*** Set up the proxy on host
 
-There's a macro defined in `/etc/apache2/sites-enabled/redirect.conf`:
+There's a macro defined in ~/etc/apache2/sites-enabled/redirect.conf~:
 
-```
+#+begin_src
 <Macro juliabox $SECTION $IP>
 
  RewriteCond %{HTTP:Connection} Upgrade [NC]
@@ -140,19 +139,19 @@ There's a macro defined in `/etc/apache2/sites-enabled/redirect.conf`:
 Use juliabox test 10.8.3.151
 
 UndefMacro juliabox
-```
+#+end_src
 
-So you just need to add an extra line like `Use juliabox NAME IP`,
+So you just need to add an extra line like ~Use juliabox NAME IP~,
 where NAME is the name you want in the url of the juliabox instance,
-and IP is the IP address the container has on host, from `lxc ls`.
+and IP is the IP address the container has on host, from ~lxc ls~.
 
 
 
-## Set up the proxy on proxy
+*** Set up apache on proxy
 
-There's a macro defined in `/etc/apache/sites-enabled/000-default-le-ssl.conf `:
+There's a macro defined in ~/etc/apache/sites-enabled/000-default-le-ssl.conf ~:
 
-```
+#+begin_src
 ### start juliabox config
 
 RewriteEngine on
@@ -179,34 +178,34 @@ Use juliabox test 10.8.0.10
 UndefMacro juliabox
 
 ### end juliabox config
-```
+#+end_src
 
-So just add a line `Use juliabox NAME 10.8.0.10`, proxy talks to host
+So just add a line ~Use juliabox NAME 10.8.0.10~, proxy talks to host
 over openvpn, so everything has the same IP.
 
 
 
 
-## <a name="add_user"></a> Adding new users
+*** <a name="add_user"></a> Adding new users
 
-Now you should be able to login as `admin` at `https://www.math.csi.cuny.edu/juliabox-SECTION`.
+Now you should be able to login as ~admin~ at ~https://www.math.csi.cuny.edu/juliabox-SECTION~.
 
 Make a text file consisting of a list of usernames, one per line.
 Recommended: Use the webwork usernames as the usernames.
 
-* Click on `Control Panel` in the top right corner.
+* Click on ~Control Panel~ in the top right corner.
 
-* Now click on `Admin` on the top left.
+* Now click on ~Admin~ on the top left.
 
-* Now click on the `Add Users` button.  Cut and paste the list of users
-into the text box, and click on `Add Users`.
+* Now click on the ~Add Users~ button.  Cut and paste the list of users
+into the text box, and click on ~Add Users~.
 
 Each user is created with an initially blank password, and the
 password is set the first time a user logs in .
 
 Users can change their passwords at this link:
 
-`https://www.math.csi.cuny.edu/juliabox-SECTION/hub/auth/change-password`
+~https://www.math.csi.cuny.edu/juliabox-SECTION/hub/auth/change-password~
 
 If you need to change a user's password, follow the instructions here:
 
@@ -215,17 +214,17 @@ If you need to change a user's password, follow the instructions here:
 
 
 
-## Use openvpn in the container
+*** Use openvpn in the container
 
-TODO: fix openvpn on `proxy` to give genuinely fixed IP addresses to
+TODO: fix openvpn on ~proxy~ to give genuinely fixed IP addresses to
 the clients.
 
 From [https://superuser.com/questions/1202749/how-to-run-openvpn-in-a-lxc-container-inside-debian-host](https://superuser.com/questions/1202749/how-to-run-openvpn-in-a-lxc-container-inside-debian-host),
 added this in /usr/share/lxc/common.conf.d/tun.conf:
 
-```
+#+begin_src
 host# lxc.mount.entry = /dev/net/tun dev/net/tun none bind,create=file
-```
+#+end_src
 
 This should now hold globally for all new containers, you shouldn't
 have to do it again.  However, you may need to do the following once
@@ -233,23 +232,23 @@ in each new container.
 
 From [https://www.rfc3092.net/2019/03/openvpn-in-ubuntu-18-04-foo-within-openvz-container-strato/](https://www.rfc3092.net/2019/03/openvpn-in-ubuntu-18-04-foo-within-openvz-container-strato/):
 
-```
+#+begin_src
 systemctl edit openvpn@
-```
+#+end_src
 
 Then add:
 
-```
+#+begin_src
 [Service]
 LimitNPROC=infinity
-```
+#+end_src
 
 Now make a client.ovpn file on proxy. From
 [https://www.digitalocean.com/community/tutorials/how-to-set-up-an-openvpn-server-on-debian-10](https://www.digitalocean.com/community/tutorials/how-to-set-up-an-openvpn-server-on-debian-10):
 
 How to add a new client - following steps should generate a client1.ovpn file:
 
-```
+#+begin_src
 cd /etc/openvpn/easyrsa
 
 ./easyrsa gen-req client1 nopass
@@ -265,24 +264,24 @@ cd ..
 cd clients
 
 ./make_config.sh client1
-```
+#+end_src
 
 
 Note that if you copy the client1.opvn file to
-`/etc/openvpn/vpn.conf`, then you need to refer to the vpn daemon as
+~/etc/openvpn/vpn.conf~, then you need to refer to the vpn daemon as
 openvpn@vpn, e.g.:
 
-```
+#+begin_src
 systemctl status openvpn@vpn
-```
+#+end_src
 
 On proxy:
 
-If you set up openvpn in the container, you don't need the `apache2`
+If you set up openvpn in the container, you don't need the ~apache2~
 forward on host, and you can forward from proxy directly to the container with something like:
 
 
-```
+#+begin_src
  Define IP 10.8.0.6
  Define SECTION 13575
 
@@ -296,7 +295,7 @@ forward on host, and you can forward from proxy directly to the container with s
    ProxyPass http://${IP}:80/juliabox-${SECTION}/
    ProxyPassReverse http://${IP}:80/juliabox-${SECTION}/
  </Location>
-```
+#+end_src
 
 
 
