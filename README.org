@@ -3,395 +3,301 @@
 Most of this due to [[https://github.com/mauro3][mauro3]], some additional edits for getting 
 [[https://github.com/mth229/MTH229.jl][MTH229]] installed.
 
-I sure took me some time to figure this one out.  [[https://tljh.jupyter.org/en/latest/index.html][The Littlest JupyterHub]]
-install itself was a breeze but the Julia side of things was not as it
-was tricky to find the documentation.  Thanks to @fredrikekre for the help!
+Here are some notes for using this to get TLJH installed in an lxc container.
 
-These are notes to myself plus a script to do the install on a
-Linode.com server running Ubuntu.  But the script should work on any
-Ubuntu server and many Linux servers.  It maybe useful to others too.
-If you have questions or corrections, open an issue/pull-request.
+Important: this script stomps all over /etc/passwd, so only ever run it in a container that is not going to be used for anything else.
 
-Also, I figured out a setup to run TLJH within a virtual machine on a
-(real) server we have and expose it to the internet, see [[https://maurow.bitbucket.io/notes/multipass-vm-port-forwarding.html][here]].
+Assumptions: 
 
-*NOTE*: only run this on a /dedicated server/ (or virtual-machine) as it
-will mess with settings you probably don't want messed with! For
-security reasons, this is also the recommendation from the TLJH-folks ([[https://tljh.jupyter.org/en/latest/install/custom-server.html][link]]).
+ - host runs lxd and apache
 
-*TL;DR*
-- clone this repo to your server: ~git clone https://github.com/josephmaher/JupyterHubWithJulia.git~
-- copy ~settings_tljh_julia_TEMPLATE.sh~ to ~settings_tljh_julia.sh~
-- edit ~settings_tljh_julia.sh~ to your liking
-- optional but needed for HTTPS: give the server a domain name by setting
-  the DNS records
-- run ~./tljh_install.sh~ (as root).  This will take about 10-20min.
-- login on your JupyterHub website as root and make user accounts
-- done
+ - proxy runs apache and acts as a proxy for host
 
-TODO:
-- make and use a system-image for Julia
+ - host and proxy are on the same vpn to protect unencrypted traffic between them
 
-* The scripts tljh_install.sh and settings_tljh_julia.sh
+# Notes on running juliabox on host
 
-There are two scripts in this repo (and they are the authoritative
-source, although I will try to keep this README up to date):
-- settings-template is [[./settings_tljh_julia_TEMPLATE.sh][settings_tljh_julia_TEMPLATE.sh]] which needs to
-  be filled in and renamed to ~settings_tljh_julia.sh~.
-- install script [[./tljh_install.sh][tljh_install.sh]] which does the full install
+## Create a new base image container
 
-In the following I will describe what these scipts do.  If you execute
-the commands by hand:
-- do it as root user
-- first source ~. ./settings_tljh_julia.sh~
+The current base image container is `juliabox-20230110`.  If you want
+to update it, it's probably easiest to just start from scratch with a
+new container, called `juliabox-DATE below`:
 
-* Global settings
-All global settings are contained within
-~settings_tljh_julia.sh~ which is derived from editing
-[[./settings_tljh_julia_TEMPLATE.sh]].  These settings are used
-throughout the install, so it is assumed that this file is sourced
-before executing the commands listed below (it is sourced
-automatically in ~tljh_install.sh~).
+```
+host# lxc launch ubuntu:22.04 juliabox-DATE
+```
 
-* Linode (or any Ubuntu) server setup
-Linode.com offers Linux servers in the cloud.  Currently there are
-quite a few $100-credit offers going around, that's why I started here.
-But I think the script should work on any Ubuntu 20.04 system.
+Get a root shell in the container:
 
-*NOTE*: again, only run these scripts on a dedicated server!  Both for
-security reasons (TLJH-people recommendation) and because these
-scripts will likely mess with your setup.
+```
+host# lxc exec juliabox-DATE -- /bin/bash
+```
 
-Install:
-- Ubuntu 20.04 LTS
-- choose at least 2GB of RAM (but much more for multi-user)
+Now install julia etc, (full instructions here: [https://github.com/josephmaher/JupyterHubWithJulia](https://github.com/josephmaher/JupyterHubWithJulia)), as follows:
 
-Boot the server.  Then, if you want HTTPS, set the domain record next.
+Download the install scripts to the container:
 
-** Setting a Domain Record via http://linode.com
-Having an actual url is needed for HTTPS access.
+```
+juliabox# git clone https://github.com/josephmaher/JupyterHubWithJulia.git
+juliabox# cd JupyterHubWithJulia/
+juliabox# cp settings_tljh_julia_TEMPLATE.sh settings_tljh_julia.sh
+```
 
-If you have a Domain at Linode, otherwise see below:
-- Go to https://cloud.linode.com/domains/
-- click "Add an A/AAAA Record"
-- Settings
-  Hostname: whatever-your-hostname-is
-  IP address: copy from your server
-  TTL: 5min (this sets on how quickly records propagate through DNS on changes)
-- check in a few seconds/minutes whether the record propagated far
-  enough for Let's Encrypt to pick it up with  https://letsdebug.net/
-  (note that the error about no web-server running is ok.  It just
-  needs to be able to resolve the domain name.)
-
-For the domain transfer to Linode I followed
-https://merelycurious.me/post/connecting-namecheap-domain-to-linode;
-but you don't need to have your domain at Linode.
-
-*** Aside: HTTPS with Let's Encrypt
-*The Let's Encrypt setup I do via The Littelest JuptyterHub install, which is super easy.*
-But here some notes on how to do it without using the TLJH machinery:
-
-Let's encrypt: [[https://www.linode.com/docs/guides/install-lets-encrypt-to-create-ssl-certificates/][docs]]
-- root@localhost:/opt/letsencrypt# ./letsencrypt-auto certonly --standalone -d example.com -d jhub.example.com -d docker.example.com
-  -> does not work
-- loosly follow instead
-  https://www.rosehosting.com/blog/how-to-install-lets-encrypt-on-ubuntu-20-04-with-apache/
-  - apt install software-properties-common
-  - apt update
-  - apt install certbot
-  - certbot certonly --standalone -d jhub.example.com
-  - keys are in /etc/letencrypt
+edit `settings_tljh_julia.sh` if needed
 
 
-*** Notes on proxy / base_url settings
+```
+./tljh_install.sh
 
-To change the base_url (needed for proxying through another website) run this as root inside the container:
+```
 
-#+begin_src
-tljh-config set base_url '/juliabox/'
-tljh-config reload
-#+end_src
+This will download and install everything, may take about 10 minutes and requires some babysitting.
 
-The changes should show up in ~/opt/tljh/config/config.yaml~
 
-The apache forwarding settings that seem to work are here, assuming the remote machine is running on port 8001:
+With the current forwarding setup, you will need to set the base_url in the container:
 
-#+begin_src
-Define IP <whatever the ip of the machine running the container is>
+```
+juliabox# tljh-config set base_url '/juliabox-DATE/'
+juliabox# tljh-config reload
+```
+
+Then edit the apache configuration for forwarding on both host and
+proxy (see below for details).
+
+Login and run all the projects and check that everything works.
+
+If you need to add/update/precompile packages, then something like
+this from `julia_install.sh` should work (change v1.9 to the current
+version of julia if you're using a different version of `julia`):
+
+```
+export julia_global_depot=$(julia -e 'print(DEPOT_PATH[2])')
+export julia_global_env_dir=$(julia -e 'using Pkg; print(Pkg.envdir(DEPOT_PATH[2]))')
+export julia_global_env=$julia_global_env_dir/v1.9
+
+julia --project=$julia_global_env -e 'deleteat!(DEPOT_PATH, [1,3]); using Pkg; Pkg.update(); Pkg.add("MYPACKAGE"); Pkg.precompile()'
+```
+
+The scripts will download the MTH229 projects into ```/etc/skel/```.
+Remove the ```*.toml``` files from the MTH229 projects tarball, otherwise
+there seem to be dependency issues...
+
+Once everything is working, for the admin user (or some other user)
+copy all of their files over to `/etc/skel/` and make sure they're all
+owned by `root:root` - newly created users will have the files in
+`/etc/skel/` copied across to their home directories.
+
+Now you can copy the `juliabox-DATE` image to make containers for each
+section.  The new containers will inherit whaterever admin password
+you chose for the base container.
+
+## Copy the base image container
+
+Probably best to have one container per section, so copy the base
+image to make a new container:
+
+```
+host# lxc copy juliabox-DATE juliabox-SECTION
+host# lxc start juliabox-SECTION
+```
+
+You will need to set the base_url in the container:
+
+```
+host# lxc exec juliabox-SECTION -- /bin/bash
+juliabox# tljh-config set base_url '/juliabox-SECTION/'
+juliabox# tljh-config reload
+```
+
+
+`lxc ls` which show you the list of current containers, and what IP
+addresses they have.  They have local IP addresses on `kolmogorov`, so
+you either need to proxy them with `apache2` on `kolmogorov`, or set
+up `openvpn` on the container.
+
+## Set up the proxy on host
+
+There's a macro defined in `/etc/apache2/sites-enabled/redirect.conf`:
+
+```
+<Macro juliabox $SECTION $IP>
+
+ RewriteCond %{HTTP:Connection} Upgrade [NC]
+ RewriteCond %{HTTP:Upgrade} websocket [NC]
+ RewriteRule /juliabox-$SECTION/(.*) ws://$IP:80/juliabox-$SECTION/$1 [P,L]
+ RewriteRule /juliabox-$SECTION/(.*) http://$IP:80/juliabox-$SECTION/$1 [P,L]
+
+ <Location /juliabox-$SECTION>
+ #Preserve Host header to avoid cross-origin problems
+ ProxyPreserveHost On
+ #proxy to JupyterHub
+ ProxyPass http://$IP:80/juliabox-$SECTION/
+ ProxyPassReverse http://$IP:80/juliabox-$SECTION/
+ </Location>
+
+</Macro>
+
+Use juliabox test 10.8.3.151
+
+UndefMacro juliabox
+```
+
+So you just need to add an extra line like `Use juliabox NAME IP`,
+where NAME is the name you want in the url of the juliabox instance,
+and IP is the IP address the container has on host, from `lxc ls`.
+
+
+
+## Set up the proxy on proxy
+
+There's a macro defined in `/etc/apache/sites-enabled/000-default-le-ssl.conf `:
+
+```
+### start juliabox config
 
 RewriteEngine on
 
-RewriteCond %{HTTP:Connection} Upgrade [NC]
-RewriteCond %{HTTP:Upgrade} websocket [NC]
-RewriteRule /juliabox/(.*) ws://${IP}:8001/juliabox/$1 [P,L]
-RewriteRule /juliabox/(.*) http://${IP}:8001/juliabox/$1 [P,L]
+<Macro juliabox $SECTION $IP>
 
-<Location /juliabox> 
- 
-ProxyPreserveHost On
-ProxyPass http://${IP}:8001/juliabox/
-ProxyPassReverse http://${IP}:8001/juliabox/
+ RewriteCond %{HTTP:Connection} Upgrade [NC]
+ RewriteCond %{HTTP:Upgrade} websocket [NC]
+ RewriteRule /juliabox-$SECTION/(.*) ws://$IP:8001/juliabox-$SECTION/$1 [P,L]
+ RewriteRule /juliabox-$SECTION/(.*) http://$IP:8001/juliabox-$SECTION/$1 [P,L]
 
-</Location>
-#+end_src
+ <Location /juliabox-$SECTION>
+ #Preserve Host header to avoid cross-origin problems
+ ProxyPreserveHost On
+ #proxy to JupyterHub
+ ProxyPass http://$IP:8001/juliabox-$SECTION/
+ ProxyPassReverse http://$IP:8001/juliabox-$SECTION/
+ </Location>
 
+</Macro>
 
+Use juliabox test 10.8.0.10
 
-** The install
+UndefMacro juliabox
 
-The install is done within the section ~Server (Linode) base install~
-of the install script [[./tljh_install.sh][tljh_install.sh]].  It does:
-- update system via ~apt~
-- set time-zone
-- set networking stuff by hand (this is disabled in the script as it does not work in general)
-- disable SSH password login, if there is a /root/.ssh/authorized_keys
-  file (i.e. assuming there is a key for passwordless login). *Note*
-  this potentially locks you out of the system, if so disable it.
-- setup ~ufw~ firewall
+### end juliabox config
+```
 
-* The littelest JuliaHub (TLJH) install
-
-Up-front note: there are two terminals once TLJH is running:
-  - the normal shell (via ssh)
-  - the terminal in the web-interface
-The latter has some special environment variables set, namely the
-~$PATH~.  The setup described here uses the normal shell exclusively
-(by setting the ~$PATH~), this is a bit different to the docs on
-https://tljh.jupyter.org/en/latest/index.html.
-
-This part of the install is done in the section ~The Littlest
- JupyterHub install~ of [[./tljh_install.sh][tljh_install.sh]].
-
-** Install
-The install follows
-https://tljh.jupyter.org/en/latest/install/custom-server.html
-#+begin_src
-curl -L https://tljh.jupyter.org/bootstrap.py | python3 - --admin $jupyteradmin
-#+end_src
-
-*Don't create users yet.*
-
-** HTTPS
-The install-script only does this if the ~$email4letsencrypt~ variable
-is set.
-
-- Using Let's Encrypt
-- this only works once the domain is set in DNS manager (see above).  Once set, it should be
-  very quick (seconds) for Let's Encrypt to be able to resolve the
-  DNS.  You can check with https://letsdebug.net/ whether it can
-  resolve it.
-- It's done through TLJH
-  https://tljh.jupyter.org/en/latest/howto/admin/https.html#howto-admin-https
-- If there are problems, the website https://letsdebug.net/ might help.
+So just add a line `Use juliabox NAME 10.8.0.10`, proxy talks to host
+over openvpn, so everything has the same IP.
 
 
-#+begin_src
-tljh-config set https.enabled true
-tljh-config set https.letsencrypt.email $email4letsencrypt
-tljh-config add-item https.letsencrypt.domains $fqdn
-#+end_src
-Check and reload:
-#+begin_src
-tljh-config show
-tljh-config reload proxy
-#+end_src
-
-** TLJH config
-*Set kernel shutdown time*
-
-The Jupyter-kernel of each user will shut down after some idle time,
-10min by default.
-Probably increase this as Julia takes time to startup, so a shutdown
-is annoying.
-Ref: https://tljh.jupyter.org/en/latest/topic/idle-culler.html?highlight=timeout
-
-At the root-shell:
-#+begin_src
-tljh-config set services.cull.timeout 3600
-tljh-config reload
-#+end_src
-
-*Limit CPU & RAM*
-https://tljh.jupyter.org/en/latest/topic/tljh-config.html?highlight=environment#user-server-limits
-
-Note that Julia is quite memory hungry with one Julia notebook taking
-up at least 400MB and more once packages are used (Python notebooks
-start at 130MB).  Thus, set at least 1GB of memory per user, better
-2GB.
-
-#+begin_src
-tljh-config set limits.memory 2G
-tljh-config set limits.cpu 1
-tljh-config reload
-#+end_src
-
-** A note on JupyterHub Passwords
-The default install is that each user sets their password on the first
-login: https://tljh.jupyter.org/en/latest/howto/auth/firstuse.html
-
-- change your own password on
-  https://jhub.example.com/hub/auth/change-password
-- admin can reset user password with
-  https://tljh.jupyter.org/en/latest/install/custom-server.html
-- admin can reset admin password with
-  https://tljh.jupyter.org/en/latest/howto/admin/admin-users.html
 
 
-* Package & Julia install
-This was the tricky bit to figure out, or more precisely, the Julia
-side of it is a bit tricky.
+## <a name="add_user"></a> Adding new users
 
-*If you follow along by hand, maybe backup your server now.* On Linode
-there is the "Manual Snapshot" option in the "Backups" tab, probably
-best to first shutdown the server though.  That way you can get back
-to the good install.  For me, the size of the Linode backup was 32GB.
+Now you should be able to login as `admin` at `https://www.math.csi.cuny.edu/juliabox-SECTION`.
 
-This part of the install is done in the section ~Python and Julia
-package installs (system-wide)~ of [[./tljh_install.sh][tljh_install.sh]] which calls out to
-[[./julia_install.sh][julia_install.sh]] for the heavy lifting.
+Make a text file consisting of a list of usernames, one per line.
+Recommended: Use the webwork usernames as the usernames.
 
-** Machine-wide Python packages install
-See
-https://tljh.jupyter.org/en/latest/howto/env/user-environment.html,
-but note that we don't execute the commands at the web-terminal, thus
-dropping the ~sudo -E~.
+* Click on `Control Panel` in the top right corner.
 
-#+begin_src
-pip install numpy
-pip install matplotlib
-pip install scipy
-#+end_src
-This will spew some warnings about "WARNING: The directory
-'/home/jupyter-admin/.cache/pip/http' or its parent directory is not
-owned by the current user"; as far as I can tell, those are ok.
+* Now click on `Admin` on the top left.
 
-** Machine-wide Julia install
-This is in [[./julia_install.sh][julia_install.sh]].
-*** Install Julia binaries
+* Now click on the `Add Users` button.  Cut and paste the list of users
+into the text box, and click on `Add Users`.
 
-Essentially downloads Julia binaries, puts them into the right place
-and adds some sym-links. See setion ~## Download and unpack Julia~ of [[./julia_install.sh][julia_install.sh]].
+Each user is created with an initially blank password, and the
+password is set the first time a user logs in .
 
-*** Julia package install
-This is where it gets a bit dicey.  I do the following:
-- the root user installs the system-wide packages using the depot path
-  ~DEPOT_PATH[2]~ (this is a variable defined within running Julia)
-  and using an environment ~DEPOT_PATH[2]/environments/<julia version>/~.
-- install the packages:
-  - IJulia to actually make the Jupyter notebooks work
-  - any other packages
-- To make these packages available to users the ~LOAD_PATH~ of the
-  users needs to be set accordingly.
-- Ideally, a sysimage would then be created with the installed
-  packages for speedy startup: [[*Julia Sysimage (WIP)][Julia Sysimage (WIP)]].  But this I
-  haven't tried yet.
+Users can change their passwords at this link:
 
-**** Global depot and environment
-Make special environment and global depot-folder:
-#+begin_src
-# the packages are installed into this depot:
-export julia_global_depot=$(julia -e 'print(DEPOT_PATH[2])')
-mkdir -p $julia_global_depot
+`https://www.math.csi.cuny.edu/juliabox-SECTION/hub/auth/change-password`
 
-# The corresponding environment is (another one could be chosen):
-export julia_global_env_dir=$(julia -e 'using Pkg; print(Pkg.envdir(DEPOT_PATH[2]))')
-export julia_global_env=$julia_global_env_dir/v$julia_version_short
-mkdir -p $julia_global_env
-touch $julia_global_env/Project.toml
-#+end_src
+If you need to change a user's password, follow the instructions here:
 
-**** IJulia install
-The Julia kernel needs to be copied to the location where TLJH can use it.
-
-#+begin_src
-julia --project=$julia_global_env -e 'deleteat!(DEPOT_PATH, [1,3]); using Pkg; Pkg.update(); Pkg.add("IJulia"); Pkg.precompile()'
-cp -r ~/.local/share/jupyter/kernels/julia-$julia_version_short /opt/tljh/user/share/jupyter/kernels/
-#+end_src
-
-Adapted from
-https://github.com/dclong/docker-jupyterhub-julia/blob/master/Dockerfile;
-note that the two `chmod` in that docker file are not needed here (in
-fact are bad, because global package updates then fail).
-
-**** Install more Julia packages
-Install more Julia packages as specified in the settings variable ~$julia_packages~:
-
-#+begin_src
-julia --project=$julia_global_env -e 'deleteat!(DEPOT_PATH, [1,3]); using Pkg; Pkg.update(); Pkg.add.(split(ENV["julia_packages"], '\'':'\'')); Pkg.precompile()'
-#+end_src
-
-Note, the precompilation is usable for all users.
-
-**** Set the user LOAD_PATH to pick up the global packages
-
-The installed packages are availabe to all users now but they don't
-have their own environment at the moment, give it to them:
-#+begin_src
-mkdir -p /etc/skel/.julia/environments/v1.4
-touch /etc/skel/.julia/environments/v1.4/Project.toml
-#+end_src
-This uses the ~/etc/skel~ directory which is used as template (by Linux) when a
-user is created.
-
-But now their own environment shadows the global one, to rectify this
-the global one needs to be specified explicitly:
-#+begin_src
-export julia_local_env_dir=$(julia -e 'using Pkg; print(Pkg.envdir("/etc/skel/.julia/"))')
-export julia_local_env=$julia_local_env_dir/v$julia_version_short
-mkdir -p $julia_local_env
-touch $julia_local_env/Project.toml
-mkdir -p /etc/skel/.julia/config
-echo "# Add load-path to globally installed packages" > /etc/skel/.julia/config/startup.jl
-echo "push!(LOAD_PATH, "\"$julia_global_env\"")" >> /etc/skel/.julia/config/startup.jl
-#+end_src
-
-**** Julia Sysimage (WIP)
-This is work in progress.  If I get to run it, I'll update here.
-Create a sysimage with the globally installed packages.
-
-https://julialang.github.io/PackageCompiler.jl/dev/sysimages/
-
-Precompile script ~tmp.jl~:
-#+begin_src
-using ... # installed packages
-
-# execute what is normally executed to make sysimage-compilation pick it up
-
-notebook()
-#+end_src
-
-All in all:
-
-~create_sysimage([packages...], sysimage_path="/tmp/sysimg2.so", precompile_execution_file="tmp.jl")~
-
-* All done, mostly
-The script [[./tljh_install.sh][tljh_install.sh]] finished with the last section.  Here some
-additional and/or extra steps.
-
-** Deployment for users
-
-*** Create users
-
-Login as admin user on the web-page and go to the "Admin" panel in the
-web interface.
-
-Note that the corresponding unix users will only be created upon their
-first login.
-
-*** Extra stuff to do
-
-See [[./tljh_extras.sh][tljh_extras.sh]].
+[https://tljh.jupyter.org/en/latest/howto/auth/firstuse.html](https://tljh.jupyter.org/en/latest/howto/auth/firstuse.html)
 
 
-- how to deploy notebooks?
-  - See [[https://tljh.jupyter.org/en/latest/howto/content/nbgitpuller.html][nbgitpuller]]
-  - add them to ~/etc/skel~
-  - copy directories/files to all users with [[./copy_to_users.sh][copy_to_users.sh]] script
-- [[https://tljh.jupyter.org/en/latest/howto/content/share-data.html#option-3-create-a-directory-for-users-to-share-notebooks-and-other-files][how to let the users collaborate]]:
-#+begin_src
-mkdir -p /srv/scratch
-chown  root:jupyterhub-users /srv/scratch
-chmod 777 /srv/scratch
-chmod g+s /srv/scratch
-ln -s /srv/scratch /etc/skel/scratch
-#+end_src
+
+
+## Use openvpn in the container
+
+TODO: fix openvpn on `proxy` to give genuinely fixed IP addresses to
+the clients.
+
+From [https://superuser.com/questions/1202749/how-to-run-openvpn-in-a-lxc-container-inside-debian-host](https://superuser.com/questions/1202749/how-to-run-openvpn-in-a-lxc-container-inside-debian-host),
+added this in /usr/share/lxc/common.conf.d/tun.conf:
+
+```
+host# lxc.mount.entry = /dev/net/tun dev/net/tun none bind,create=file
+```
+
+This should now hold globally for all new containers, you shouldn't
+have to do it again.  However, you may need to do the following once
+in each new container.
+
+From [https://www.rfc3092.net/2019/03/openvpn-in-ubuntu-18-04-foo-within-openvz-container-strato/](https://www.rfc3092.net/2019/03/openvpn-in-ubuntu-18-04-foo-within-openvz-container-strato/):
+
+```
+systemctl edit openvpn@
+```
+
+Then add:
+
+```
+[Service]
+LimitNPROC=infinity
+```
+
+Now make a client.ovpn file on proxy. From
+[https://www.digitalocean.com/community/tutorials/how-to-set-up-an-openvpn-server-on-debian-10](https://www.digitalocean.com/community/tutorials/how-to-set-up-an-openvpn-server-on-debian-10):
+
+How to add a new client - following steps should generate a client1.ovpn file:
+
+```
+cd /etc/openvpn/easyrsa
+
+./easyrsa gen-req client1 nopass
+
+cp pki/private/client1.key ../clients/keys/
+
+./easyrsa sign-req client client1
+
+cp pki/issued/client1.crt ../clients/keys/
+
+cd ..
+
+cd clients
+
+./make_config.sh client1
+```
+
+
+Note that if you copy the client1.opvn file to
+`/etc/openvpn/vpn.conf`, then you need to refer to the vpn daemon as
+openvpn@vpn, e.g.:
+
+```
+systemctl status openvpn@vpn
+```
+
+On proxy:
+
+If you set up openvpn in the container, you don't need the `apache2`
+forward on host, and you can forward from proxy directly to the container with something like:
+
+
+```
+ Define IP 10.8.0.6
+ Define SECTION 13575
+
+ RewriteCond %{HTTP:Connection} Upgrade [NC]
+ RewriteCond %{HTTP:Upgrade} websocket [NC]
+ RewriteRule /juliabox-${SECTION}/(.*) ws://${IP}:80/juliabox-${SECTION}/$1 [P,L]
+ RewriteRule /juliabox-${SECTION}/(.*) http://${IP}:80/juliabox-${SECTION}/$1 [P,L]
+
+ <Location /juliabox-${SECTION}>  
+   ProxyPreserveHost On 
+   ProxyPass http://${IP}:80/juliabox-${SECTION}/
+   ProxyPassReverse http://${IP}:80/juliabox-${SECTION}/
+ </Location>
+```
+
+
+
+
