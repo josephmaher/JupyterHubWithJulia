@@ -90,7 +90,7 @@ Now you can copy the ~juliabox-DATE~ image to make containers for each
 section.  The new containers will inherit whaterever admin password
 you chose for the base container.
 
-## Copy the base image container
+*** Copy the base image container
 
 Probably best to have one container per section, so copy the base
 image to make a new container:
@@ -186,18 +186,18 @@ over openvpn, so everything has the same IP.
 
 
 
-*** <a name="add_user"></a> Adding new users
+*** Adding new users
 
 Now you should be able to login as ~admin~ at ~https://www.math.csi.cuny.edu/juliabox-SECTION~.
 
 Make a text file consisting of a list of usernames, one per line.
 Recommended: Use the webwork usernames as the usernames.
 
-* Click on ~Control Panel~ in the top right corner.
+- Click on ~Control Panel~ in the top right corner.
 
-* Now click on ~Admin~ on the top left.
+- Now click on ~Admin~ on the top left.
 
-* Now click on the ~Add Users~ button.  Cut and paste the list of users
+- Now click on the ~Add Users~ button.  Cut and paste the list of users
 into the text box, and click on ~Add Users~.
 
 Each user is created with an initially blank password, and the
@@ -233,7 +233,7 @@ in each new container.
 From [https://www.rfc3092.net/2019/03/openvpn-in-ubuntu-18-04-foo-within-openvz-container-strato/](https://www.rfc3092.net/2019/03/openvpn-in-ubuntu-18-04-foo-within-openvz-container-strato/):
 
 #+begin_src
-systemctl edit openvpn@
+juliabox# systemctl edit openvpn@
 #+end_src
 
 Then add:
@@ -249,21 +249,21 @@ Now make a client.ovpn file on proxy. From
 How to add a new client - following steps should generate a client1.ovpn file:
 
 #+begin_src
-cd /etc/openvpn/easyrsa
+proxy# cd /etc/openvpn/easyrsa
 
-./easyrsa gen-req client1 nopass
+proxy# ./easyrsa gen-req client1 nopass
 
-cp pki/private/client1.key ../clients/keys/
+proxy# cp pki/private/client1.key ../clients/keys/
 
-./easyrsa sign-req client client1
+proxy# ./easyrsa sign-req client client1
 
-cp pki/issued/client1.crt ../clients/keys/
+proxy# cp pki/issued/client1.crt ../clients/keys/
 
-cd ..
+proxy# cd ..
 
-cd clients
+proxy# cd clients
 
-./make_config.sh client1
+proxy# ./make_config.sh client1
 #+end_src
 
 
@@ -272,7 +272,7 @@ Note that if you copy the client1.opvn file to
 openvpn@vpn, e.g.:
 
 #+begin_src
-systemctl status openvpn@vpn
+proxy# systemctl status openvpn@vpn
 #+end_src
 
 On proxy:
