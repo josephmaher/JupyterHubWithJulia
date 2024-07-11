@@ -72,9 +72,10 @@ julia --project=$julia_global_env -e 'deleteat!(DEPOT_PATH, [1,3]); using Pkg; P
 wget -O /etc/skel/master.zip  https://www.github.com/mth229/229-projects/archive/master.zip
 unzip /etc/skel/master.zip -d /etc/skel/
 rm /etc/skel/master.zip
-mv /etc/skel/229-projects-master /etc/skel/229-projects
+mv /etc/skel/229-projects-main /etc/skel/229-projects
 rm /etc/skel/229-projects/Manifest.toml
 rm /etc/skel/229-projects/Project.toml
+rm /etc/skel/229-projects/*.qmd
 
 # Install more packages
 if [ ! -z "$julia_packages" ]
