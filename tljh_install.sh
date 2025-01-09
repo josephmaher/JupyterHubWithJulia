@@ -10,6 +10,11 @@
 
 PATH=$PATH:/sbin:/usr/sbin
 
+# reinstall snapd just in case, seems broken in the default lxd ubuntu image
+
+apt-get purge snapd -y
+apt-get install snapd
+
 ## Settings
 # make sure settings file is there
 if [ ! -f "settings_tljh_julia.sh" ]; then
@@ -66,6 +71,8 @@ fi
 # follows https://tljh.jupyter.org/en/latest/install/custom-server.html
 
 ## Install dependencies
+#apt install python3 python3-dev git curl nano screen wget zip unzip python3-numpy python3-scipy python3-matplotlib python3-sympy python3-plotly -y
+# plots don't work unless you install the python packages with pip, see below
 apt install python3 python3-dev git curl nano screen wget zip unzip -y
 
 ## Install TLJH
@@ -127,6 +134,15 @@ esac
 
 ## more TLJH config
 
+# fix up the two files with patches
+
+# this fixed the cross site scripting but with the password reset function
+cp -f updates/firstuseauthenticator.py /opt/tljh/hub/lib/python3.10/site-packages/firstuseauthenticator/firstuseauthenticator.py
+
+# this uses cp --reflink on /home/skel to save disk space
+cp -f updates/user.py /opt/tljh/hub/lib/python3.10/site-packages/tljh/user.py
+
+
 # Set timeout after which server shuts down
 # https://tljh.jupyter.org/en/latest/topic/idle-culler.html?highlight=timeout
 tljh-config set services.cull.timeout $tljh_timeout
@@ -138,12 +154,13 @@ tljh-config set limits.cpu $tljh_limits_cpu
 
 tljh-config reload
 
+
 #################################################
 # Python and Julia package installs (system-wide)
 #################################################
 # Including installing the Julia Jupyter-kernel
 
-## Install python packages (that's easy)
+## Install python packages (that's easy), also needed for plots to work
 pip install numpy
 pip install matplotlib
 pip install scipy
