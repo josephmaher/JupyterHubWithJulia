@@ -10,10 +10,9 @@
 
 PATH=$PATH:/sbin:/usr/sbin
 
-# reinstall snapd just in case, seems broken in the default lxd ubuntu image
-
-apt-get purge snapd -y
-apt-get install snapd
+# reinstall snapd just in case, seems broken in the default lxd ubuntu image but works on ubuntu hosts
+#apt-get purge snapd -y
+#apt-get install snapd
 
 ## Settings
 # make sure settings file is there
@@ -136,11 +135,13 @@ esac
 
 # fix up the two files with patches
 
+python_version_short=$(grep -o '[0-9]*\.[0-9]*' <<< $(python -V) | head -n1)
+
 # this fixed the cross site scripting but with the password reset function
-cp -f updates/firstuseauthenticator.py /opt/tljh/hub/lib/python3.10/site-packages/firstuseauthenticator/firstuseauthenticator.py
+cp -f updates/firstuseauthenticator.py /opt/tljh/hub/lib/python$python_version_short/site-packages/firstuseauthenticator/firstuseauthenticator.py
 
 # this uses cp --reflink on /home/skel to save disk space
-cp -f updates/user.py /opt/tljh/hub/lib/python3.10/site-packages/tljh/user.py
+cp -f updates/user.py /opt/tljh/hub/lib/python$python_version_short/site-packages/tljh/user.py
 
 
 # Set timeout after which server shuts down
