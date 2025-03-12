@@ -24,20 +24,9 @@ export julia_version=$1
 export julia_packages=$2
 export julia_version_short=$(grep -o '^[0-9]*\.[0-9]*' <<< $julia_version)
 
-## Download and unpack Julia
+## install Julia using snap
 snap install julia --classic
-#export julia_archive_name="julia-$julia_version-linux-x86_64.tar.gz"
-#export julia_parent_dir="/opt/julia"
-#export julia_dir="$julia_parent_dir/$julia_version"
-#wget -O $julia_archive_name https://julialang-s3.julialang.org/bin/linux/x64/$julia_version_short/$julia_archive_name
-#mkdir -p julia-$julia_version
-#tar zxf $julia_archive_name julia-$julia_version
-#mkdir -p $julia_parent_dir
-#mv -f julia-$julia_version $julia_dir
-# create symlinks
-#ln -sf $julia_dir/bin/julia /usr/local/bin/julia$julia_version
-#ln -sf $julia_dir/bin/julia /usr/local/bin/julia$julia_version_short
-#ln -sf $julia_dir/bin/julia /usr/local/bin/julia
+snap refresh --hold julia
 
 ## Install Julia packages
 # This is the tricky bit and requires a bit of juggling with the DEPOT_PATH
