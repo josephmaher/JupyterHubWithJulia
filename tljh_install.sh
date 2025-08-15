@@ -138,7 +138,8 @@ esac
 python_version_short=$(grep -o '[0-9]*\.[0-9]*' <<< $(python -V) | head -n1)
 
 # this fixed the cross site scripting but with the password reset function
-cp -f updates/firstuseauthenticator.py /opt/tljh/hub/lib/python$python_version_short/site-packages/firstuseauthenticator/firstuseauthenticator.py
+# fixed upstream
+# cp -f updates/firstuseauthenticator.py /opt/tljh/hub/lib/python$python_version_short/site-packages/firstuseauthenticator/firstuseauthenticator.py
 
 # this uses cp --reflink on /home/skel to save disk space
 cp -f updates/user.py /opt/tljh/hub/lib/python$python_version_short/site-packages/tljh/user.py
