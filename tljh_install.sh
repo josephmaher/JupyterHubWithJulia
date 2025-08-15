@@ -6,6 +6,14 @@
 # Make sure to create a settings_tljh_julia.sh from
 # settings_tljh_julia_TEMPLATE.sh?"
 
+#!/bin/bash
+
+if [ $(tr -d '\0' < /proc/1/environ) != "container=lxc" ]; then
+    echo "Don't run this unless you are in an lxc container"
+    exit 1
+fi
+
+
 # fix the path just in case
 
 PATH=$PATH:/sbin:/usr/sbin
