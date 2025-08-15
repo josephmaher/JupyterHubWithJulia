@@ -33,7 +33,7 @@ Get a root shell in the container:
 host# lxc exec juliabox-DATE -- /bin/bash
 #+end_src
 
-Now install julia etc, full instructions here: [https://github.com/josephmaher/JupyterHubWithJulia](https://github.com/josephmaher/JupyterHubWithJulia), as follows:
+Now install julia etc, full instructions here: [[https://github.com/josephmaher/JupyterHubWithJulia][https://github.com/josephmaher/JupyterHubWithJulia]], as follows:
 
 Download the install scripts to the container:
 
