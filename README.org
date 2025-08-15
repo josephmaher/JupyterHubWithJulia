@@ -209,7 +209,7 @@ Users can change their passwords at this link:
 
 If you need to change a user's password, follow the instructions here:
 
-[https://tljh.jupyter.org/en/latest/howto/auth/firstuse.html](https://tljh.jupyter.org/en/latest/howto/auth/firstuse.html)
+[[https://tljh.jupyter.org/en/latest/howto/auth/firstuse.html][https://tljh.jupyter.org/en/latest/howto/auth/firstuse.html]]
 
 
 
@@ -219,7 +219,7 @@ If you need to change a user's password, follow the instructions here:
 TODO: fix openvpn on ~proxy~ to give genuinely fixed IP addresses to
 the clients.
 
-From [https://superuser.com/questions/1202749/how-to-run-openvpn-in-a-lxc-container-inside-debian-host](https://superuser.com/questions/1202749/how-to-run-openvpn-in-a-lxc-container-inside-debian-host),
+From [[https://superuser.com/questions/1202749/how-to-run-openvpn-in-a-lxc-container-inside-debian-host][https://superuser.com/questions/1202749/how-to-run-openvpn-in-a-lxc-container-inside-debian-host]],
 added this in /usr/share/lxc/common.conf.d/tun.conf:
 
 #+begin_src
@@ -230,7 +230,7 @@ This should now hold globally for all new containers, you shouldn't
 have to do it again.  However, you may need to do the following once
 in each new container.
 
-From [https://www.rfc3092.net/2019/03/openvpn-in-ubuntu-18-04-foo-within-openvz-container-strato/](https://www.rfc3092.net/2019/03/openvpn-in-ubuntu-18-04-foo-within-openvz-container-strato/):
+From [[https://www.rfc3092.net/2019/03/openvpn-in-ubuntu-18-04-foo-within-openvz-container-strato/][https://www.rfc3092.net/2019/03/openvpn-in-ubuntu-18-04-foo-within-openvz-container-strato/]]:
 
 #+begin_src
 juliabox# systemctl edit openvpn@
@@ -244,7 +244,7 @@ LimitNPROC=infinity
 #+end_src
 
 Now make a client.ovpn file on proxy. From
-[https://www.digitalocean.com/community/tutorials/how-to-set-up-an-openvpn-server-on-debian-10](https://www.digitalocean.com/community/tutorials/how-to-set-up-an-openvpn-server-on-debian-10):
+[[https://www.digitalocean.com/community/tutorials/how-to-set-up-an-openvpn-server-on-debian-10][https://www.digitalocean.com/community/tutorials/how-to-set-up-an-openvpn-server-on-debian-10]]:
 
 How to add a new client - following steps should generate a client1.ovpn file:
 
