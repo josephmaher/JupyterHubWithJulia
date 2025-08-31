@@ -18,9 +18,8 @@ fi
 
 PATH=$PATH:/sbin:/usr/sbin
 
-# reinstall snapd just in case, seems broken in the default lxd ubuntu image but works on ubuntu hosts
-#apt-get purge snapd -y
-#apt-get install snapd
+# make sure snap is installed
+apt -y install snapd
 
 ## Settings
 # make sure settings file is there
