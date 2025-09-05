@@ -214,70 +214,51 @@ If you need to change a user's password, follow the instructions here:
 
 
 
-*** Use openvpn in the container
+*** Use headscale / tailscale in the container
 
-TODO: fix openvpn on ~proxy~ to give genuinely fixed IP addresses to
-the clients.
-
-From [[https://superuser.com/questions/1202749/how-to-run-openvpn-in-a-lxc-container-inside-debian-host][https://superuser.com/questions/1202749/how-to-run-openvpn-in-a-lxc-container-inside-debian-host]],
-added this in /usr/share/lxc/common.conf.d/tun.conf:
+The headscale server runs on the proxy, make a new user if necessary.
 
 #+begin_src
-host# lxc.mount.entry = /dev/net/tun dev/net/tun none bind,create=file
+proxy# headscale users create webworks2
 #+end_src
 
-This should now hold globally for all new containers, you shouldn't
-have to do it again.  However, you may need to do the following once
-in each new container.
+Recommended: install network-manager in the container, as otherwise tailscaled may not restart properly after upgrades.
 
-From [[https://www.rfc3092.net/2019/03/openvpn-in-ubuntu-18-04-foo-within-openvz-container-strato/][https://www.rfc3092.net/2019/03/openvpn-in-ubuntu-18-04-foo-within-openvz-container-strato/]]:
+Install tailscale in the container.
 
 #+begin_src
-juliabox# systemctl edit openvpn@
+container# curl -fsSL https://tailscale.com/install.sh | sh
 #+end_src
 
-Then add:
+Find the ID number of the user for the container.
 
 #+begin_src
-[Service]
-LimitNPROC=infinity
+proxy# headscale users list
 #+end_src
 
-Now make a client.ovpn file on proxy. From
-[[https://www.digitalocean.com/community/tutorials/how-to-set-up-an-openvpn-server-on-debian-10][https://www.digitalocean.com/community/tutorials/how-to-set-up-an-openvpn-server-on-debian-10]]:
-
-How to add a new client - following steps should generate a client1.ovpn file:
+Make an auth token on the proxy, where the ID for the user is N. 
 
 #+begin_src
-proxy# cd /etc/openvpn/easyrsa
-
-proxy# ./easyrsa gen-req client1 nopass
-
-proxy# cp pki/private/client1.key ../clients/keys/
-
-proxy# ./easyrsa sign-req client client1
-
-proxy# cp pki/issued/client1.crt ../clients/keys/
-
-proxy# cd ..
-
-proxy# cd clients
-
-proxy# ./make_config.sh client1
+proxy# headscale preauthkeys create --user N
 #+end_src
 
-
-Note that if you copy the client1.opvn file to
-~/etc/openvpn/vpn.conf~, then you need to refer to the vpn daemon as
-openvpn@vpn, e.g.:
+Start tailscale in the container.
+Copy and paste the auth token in the line below in the container.
 
 #+begin_src
-proxy# systemctl status openvpn@vpn
+container# tailscale up --login-server https://www.math.csi.cuny.edu:8080 --authkey XXXXXXXX
 #+end_src
+
+If the hostname for the container doesn't match the user name, you can rename it.
+
+#+begin_src
+headscale node rename -i N container
+#+end_src
+
 
 On proxy:
 
-If you set up openvpn in the container, you don't need the ~apache2~
+If you set up a vpn in the container, you don't need the ~apache2~
 forward on host, and you can forward from proxy directly to the container with something like:
 
 
