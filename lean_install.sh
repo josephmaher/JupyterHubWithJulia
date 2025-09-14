@@ -4,19 +4,23 @@
 
 mkdir /opt/lean
 
-# set $HOME to this
+# add a profile file for login shells
 
-HOME=/opt/lean
+tee /etc/profile.d/lean.sh >/dev/null <<'EOF'
+# Lean/elan (system-wide)
+export ELAN_HOME=/opt/lean
+export PATH="$ELAN_HOME/bin:$PATH"
+EOF
 
-cd $HOME
+cd /opt/lean
 
 # install elan the lean installer
 
-curl https://elan.lean-lang.org/elan-init.sh -sSf | sh -s -- -y
+ELAN_HOME=/opt/lean bash -lc 'curl https://elan.lean-lang.org/elan-init.sh -sSf | sh -s -- --no-modify-path -y'
 
 # add elan to the path
 
-source $HOME/.elan/env
+source /opt/lean/.elan/env
 
 # now install lean4_jupyter
 
@@ -37,13 +41,32 @@ lake build
 
 ln -s /opt/lean/repl/.lake/build/bin/repl $HOME/.elan/bin/repl
 
-HOME=/root
+#HOME=/root
+
+# cp -a /usr/local/share/jupyter/kernels/lean4 /opt/tljh/user/share/jupyter/kernels
+
+
+# Make Lean (elan) visible to notebook servers
+
+tee /opt/tljh/config/jupyterhub_config.d/lean.py >/dev/null <<'EOF'
+# Expose elan + Lean tools to all user servers
+c.Spawner.environment = {
+    "ELAN_HOME": "/opt/lean",
+    # Prepend elan shims so `lean`, `lake`, and (if present) `repl` are found
+    "PATH": "/opt/lean/bin:" + "${PATH}",
+}
+EOF
+
+#tljh-config reload
+
+
 
 # make sure we have the previously installed pip in the path
 export PATH=/opt/tljh/user/bin:${PATH}
 
-pip install lean4_jupyter
+sudo -E /opt/tljh/user/bin/python3 -m pip install --upgrade lean4_jupyter
 
-python -m lean4_jupyter.install
+sudo -E /opt/tljh/user/bin/python3 -m lean4_jupyter.install --sys-prefix
 
-# cp -a /usr/local/share/jupyter/kernels/lean4 /opt/tljh/user/share/jupyter/kernels
+
+
