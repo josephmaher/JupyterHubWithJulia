@@ -226,6 +226,12 @@ export SERVER_PUBLIC_KEY=XXXXXX
 export LOCAL_IP=XXXXXX
 #+end_src
 
+You will need to run the following command on the wireguard server (currently proxy)
+
+#+begin_src
+sudo wg set wg0 peer $PRIVATE_KEY $LOCAL_IP
+#+end_src
+
 
 On proxy:
 
