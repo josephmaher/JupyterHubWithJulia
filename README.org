@@ -24,13 +24,13 @@ to update it, it's probably easiest to just start from scratch with a
 new container, called ~juliabox-DATE below~:
 
 #+begin_src
-host# lxc launch ubuntu:24.04 juliabox-DATE
+host# lxc launch ubuntu:24.04 juliabox-DATE -s poolcrypt
 #+end_src
 
 Get a root shell in the container:
 
 #+begin_src
-host# lxc exec juliabox-DATE -- /bin/bash
+host# lxc shell juliabox-DATE
 #+end_src
 
 Now install julia etc, full instructions here: [[https://github.com/josephmaher/JupyterHubWithJulia][https://github.com/josephmaher/JupyterHubWithJulia]], as follows:
@@ -216,43 +216,14 @@ If you need to change a user's password, follow the instructions here:
 
 *** Use wireguard in the container
 
-The headscale server runs on the proxy, make a new user if necessary.
+Edit the file ~install_wireguard.sh~ and set the following values to be something useful:
 
 #+begin_src
-proxy# headscale users create webworks2
-#+end_src
+export SERVER_IP=XXXXXX
 
-Recommended: install network-manager in the container, as otherwise tailscaled may not restart properly after upgrades.
+export SERVER_PUBLIC_KEY=XXXXXX
 
-Install tailscale in the container.
-
-#+begin_src
-container# curl -fsSL https://tailscale.com/install.sh | sh
-#+end_src
-
-Find the ID number of the user for the container.
-
-#+begin_src
-proxy# headscale users list
-#+end_src
-
-Make an auth token on the proxy, where the ID for the user is N. 
-
-#+begin_src
-proxy# headscale preauthkeys create --user N
-#+end_src
-
-Start tailscale in the container.
-Copy and paste the auth token in the line below in the container.
-
-#+begin_src
-container# tailscale up --login-server https://www.math.csi.cuny.edu:8080 --authkey XXXXXXXX
-#+end_src
-
-If the hostname for the container doesn't match the user name, you can rename it.
-
-#+begin_src
-headscale node rename -i N container
+export LOCAL_IP=XXXXXX
 #+end_src
 
 
@@ -263,7 +234,7 @@ forward on host, and you can forward from proxy directly to the container with s
 
 
 #+begin_src
- Define IP 10.8.0.6
+ Define IP 10.9.0.101
  Define SECTION 13575
 
  RewriteCond %{HTTP:Connection} Upgrade [NC]
