@@ -79,7 +79,7 @@ fi
 ## Install dependencies
 #apt install python3 python3-dev git curl nano screen wget zip unzip python3-numpy python3-scipy python3-matplotlib python3-sympy python3-plotly -y
 # plots don't work unless you install the python packages with pip, see below
-apt install python3 python3-dev git curl nano screen wget zip unzip -y
+apt install python3 python3-dev git curl nano screen wget zip unzip wireguard -y
 
 ## Install TLJH
 curl -L https://tljh.jupyter.org/bootstrap.py | python3 - --admin $jupyteradmin

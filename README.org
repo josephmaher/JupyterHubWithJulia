@@ -19,7 +19,7 @@ Assumptions:
 
 *** Create a new base image container
 
-The current base image container is ~juliabox-20230110~.  If you want
+The current base image container is ~juliabox-OLDDATE~.  If you want
 to update it, it's probably easiest to just start from scratch with a
 new container, called ~juliabox-DATE below~:
 
@@ -112,7 +112,7 @@ juliabox# tljh-config reload
 ~lxc ls~ which show you the list of current containers, and what IP
 addresses they have.  They have local IP addresses on ~host~, so
 you either need to proxy them with ~apache2~ on ~host~, or set
-up ~openvpn~ on the container.
+up ~wireguard~ on the container.
 
 *** Set up the proxy on host
 
@@ -214,7 +214,7 @@ If you need to change a user's password, follow the instructions here:
 
 
 
-*** Use headscale / tailscale in the container
+*** Use wireguard in the container
 
 The headscale server runs on the proxy, make a new user if necessary.
 
