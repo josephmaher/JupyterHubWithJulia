@@ -232,6 +232,14 @@ You will need to run the following command on the wireguard server (currently pr
 sudo wg set wg0 peer $PRIVATE_KEY allowed-ips $LOCAL_IP/32
 #+end_src
 
+And then start wireguard in the container.
+
+#+begin_src
+systemctl enable wg-quick@wg0
+systemctl start wg-quick@wg0
+#+end_src
+
+
 
 On proxy:
 
