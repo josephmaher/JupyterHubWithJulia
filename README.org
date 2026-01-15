@@ -229,7 +229,7 @@ export LOCAL_IP=XXXXXX
 You will need to run the following command on the wireguard server (currently proxy)
 
 #+begin_src
-sudo wg set wg0 peer $PRIVATE_KEY $LOCAL_IP
+sudo wg set wg0 peer $PRIVATE_KEY allowed-ips $LOCAL_IP/32
 #+end_src
 
 
