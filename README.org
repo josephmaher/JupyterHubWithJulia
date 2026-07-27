@@ -69,15 +69,16 @@ If you need to add/update/precompile packages, then something like
 this from ~julia_install.sh~ should work (change v1.9 to the current
 version of julia if you're using a different version of ~julia~): 
 
-as the root user, run julia, and then:
+Do this as the root user:
 
 #+begin_src
-DEPOT_PATH=["/opt/julia/1.12.5"]
-using Pkg
-Pkg.update
-Pkg.add("new_package")
-Pkg.precompile()
+export JULIA_DEPOT_PATH="/opt/julia/1.12.5:"
+julia -e 'print(DEPOT_PATH)'
+julia -e 'using Pkg; Pkg.update(); Pkg.add("MYPACKAGE"); Pkg.precompile()'
 #+end_src
+
+Replace 1.12.5 by the version of julia you are using.  Check that the /opt/julia/1.12.5
+path comes first in the list of paths.
 
 The scripts will download the MTH229 projects into ~/etc/skel/~.
 Remove the ~*.toml~ files from the MTH229 projects tarball, otherwise
