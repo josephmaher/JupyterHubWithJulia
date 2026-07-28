@@ -73,7 +73,13 @@ JULIA_DEPOT_PATH="$julia_global_depot:" julia -e 'using Pkg; Pkg.precompile()'
 # copy LocalPreferences.toml to the right place
 cp -p updates/LocalPreferences.toml /opt/julia/1.12.5/environments/v1.12/LocalPreferences.toml
 
+# now need to use MTH229 to make sure it precompiles everything
 
+JULIA_DEPOT_PATH="$julia_global_depot:" julia -e 'using MTH229'
+
+# and run precompile again after installing preferences
+
+JULIA_DEPOT_PATH="$julia_global_depot:" julia -e 'using Pkg; Pkg.precompile()'
 
 # now install the MTH229 projects in /home/skel
 mkdir -p /home/skel
