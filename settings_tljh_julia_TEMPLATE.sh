@@ -33,7 +33,7 @@ export jupyteradmin_user=jupyter-$jupyteradmin
 # how long a user's server stays alive without user interaction
 export tljh_timeout=3600
 # memory limit of each user
-export tljh_limits_memory=3G
+export tljh_limits_memory=4G
 # CPU-core limit of each user
 export tljh_limits_cpu=1
 # set path to get python and julia of TLJH
@@ -44,7 +44,7 @@ export PATH=/opt/tljh/user/bin:${PATH}
 ############
 
 # version of Julia to install. If set to the empty string, Julia will not be installed.
-export julia_version="1.12.4"
+export julia_version="1.12.5"
 
 # Packages to be installed system-wide, separate entries with ":"
 # (IJulia gets installed irrespective)
