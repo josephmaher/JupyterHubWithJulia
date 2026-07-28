@@ -1,0 +1,5 @@
+[CondaPkg]
+backend = "Null"
+
+[PythonCall]
+exe = "/opt/julia/1.12.5/environments/v1.12/.CondaPkg/.pixi/envs/default/bin/python3.14"
