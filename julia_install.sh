@@ -63,8 +63,7 @@ JULIA_DEPOT_PATH="$julia_global_depot:" julia -e 'using Pkg; Pkg.add("PythonCall
 JULIA_DEPOT_PATH="$julia_global_depot:" julia -e 'using Pkg; Pkg.add("CondaPkg")'
 
 # Install Plots
-#JULIA_DEPOT_PATH="$julia_global_depot:" julia -e 'using Pkg; Pkg.add("Plots"); Pkg.add("PlotlyBase"); Pkg.add(; name="PlotlyKaleido", version="1")'
-JULIA_DEPOT_PATH="$julia_global_depot:" julia -e 'using Pkg; Pkg.add("Plots")'
+JULIA_DEPOT_PATH="$julia_global_depot:" julia -e 'using Pkg; Pkg.add("Plots"); Pkg.add("PlotlyBase"); Pkg.add(; name="PlotlyKaleido", version="1")'
 
 
 # Make sure that MTH229 is available
