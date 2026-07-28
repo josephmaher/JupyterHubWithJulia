@@ -48,20 +48,20 @@ mkdir -p $julia_global_depot
 
 # Install IJulia
 #julia -e 'deleteat!(DEPOT_PATH, [1,3]); using Pkg; Pkg.update(); Pkg.add("IJulia"); Pkg.precompile(); using IJulia; installkernel("Julia")'
-JULIA_DEPOT_PATH=\"$julia_global_depot:\" julia -e 'using Pkg; Pkg.update(); Pkg.add("IJulia"); using IJulia; installkernel("Julia")'
+JULIA_DEPOT_PATH="$julia_global_depot:" julia -e 'using Pkg; Pkg.update(); Pkg.add("IJulia"); using IJulia; installkernel("Julia")'
 # and make the kernel available to TLJH
 cp -r ~/.local/share/jupyter/kernels/julia-$julia_version_short /opt/tljh/user/share/jupyter/kernels/
 
 # Install Plots
-JULIA_DEPOT_PATH=\"$julia_global_depot:\" julia -e 'using Pkg; Pkg.add("Plots"); Pkg.add("PlotlyBase"); Pkg.add(; name="PlotlyKaleido", version="1")'
+JULIA_DEPOT_PATH="$julia_global_depot:" julia -e 'using Pkg; Pkg.add("Plots"); Pkg.add("PlotlyBase"); Pkg.add(; name="PlotlyKaleido", version="1")'
 
 # Add Preferences
-JULIA_DEPOT_PATH=\"$julia_global_depot:\" julia -e 'using Pkg; Pkg.add("Preferences")' 
+JULIA_DEPOT_PATH="$julia_global_depot:" julia -e 'using Pkg; Pkg.add("Preferences")' 
 # copy LocalPreferences.toml to the right place
-cp updates/LocalPreferences.toml /opt/julia/1.12.5/environments/v1.12/LocalPreferences.toml
+cp -p updates/LocalPreferences.toml /opt/julia/1.12.5/environments/v1.12/LocalPreferences.toml
 
 # Make sure that MTH229 is available
-JULIA_DEPOT_PATH=\"$julia_global_depot:\" julia -e 'using Pkg; Pkg.add("MTH229"); Pkg.precompile()'
+JULIA_DEPOT_PATH="$julia_global_depot:" julia -e 'using Pkg; Pkg.add("MTH229"); Pkg.precompile()'
 # Then install it
 #julia --project=$julia_global_env -e 'deleteat!(DEPOT_PATH, [1,3]); using Pkg; Pkg.update(); Pkg.add("MTH229"); Pkg.precompile()'
 
@@ -78,7 +78,7 @@ rm /home/skel/229-projects/*.qmd
 # Install more packages
 if [ ! -z "$julia_packages" ]
 then
-    JULIA_DEPOT_PATH=\"$julia_global_depot:\" julia -e 'using Pkg; Pkg.add.(split(ENV["julia_packages"], '\'':'\'')); Pkg.precompile()'
+    JULIA_DEPOT_PATH="$julia_global_depot:" julia -e 'using Pkg; Pkg.add.(split(ENV["julia_packages"], '\'':'\'')); Pkg.precompile()'
 fi
 
 # ensure all users can read General registry
