@@ -52,13 +52,20 @@ JULIA_DEPOT_PATH="$julia_global_depot:" julia -e 'using Pkg; Pkg.update(); Pkg.a
 # and make the kernel available to TLJH
 cp -r ~/.local/share/jupyter/kernels/julia-$julia_version_short /opt/tljh/user/share/jupyter/kernels/
 
-# Install Plots
-JULIA_DEPOT_PATH="$julia_global_depot:" julia -e 'using Pkg; Pkg.add("Plots"); Pkg.add("PlotlyBase"); Pkg.add(; name="PlotlyKaleido", version="1")'
 
 # Add Preferences
-JULIA_DEPOT_PATH="$julia_global_depot:" julia -e 'using Pkg; Pkg.add("Preferences")' 
+JULIA_DEPOT_PATH="$julia_global_depot:" julia -e 'using Pkg; Pkg.add("Preferences")'
 # copy LocalPreferences.toml to the right place
 cp -p updates/LocalPreferences.toml /opt/julia/1.12.5/environments/v1.12/LocalPreferences.toml
+
+# These have to go in in the right order
+JULIA_DEPOT_PATH="$julia_global_depot:" julia -e 'using Pkg; Pkg.add("PythonCall")'
+JULIA_DEPOT_PATH="$julia_global_depot:" julia -e 'using Pkg; Pkg.add("CondaPkg")'
+
+# Install Plots
+#JULIA_DEPOT_PATH="$julia_global_depot:" julia -e 'using Pkg; Pkg.add("Plots"); Pkg.add("PlotlyBase"); Pkg.add(; name="PlotlyKaleido", version="1")'
+JULIA_DEPOT_PATH="$julia_global_depot:" julia -e 'using Pkg; Pkg.add("Plots")'
+
 
 # Make sure that MTH229 is available
 JULIA_DEPOT_PATH="$julia_global_depot:" julia -e 'using Pkg; Pkg.add("MTH229"); Pkg.precompile()'
