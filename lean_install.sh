@@ -1,72 +1,60 @@
 #!/bin/bash
 
-# We want everything to end up here
+# from claude
 
-mkdir /opt/lean
+# install code-server and vscode using conda
 
-# add a profile file for login shells
+sudo -E conda install -c conda-forge code-server jupyter-vscode-proxy
 
-tee /etc/profile.d/lean.sh >/dev/null <<'EOF'
-# Lean/elan (system-wide)
-export ELAN_HOME=/opt/lean
-export PATH="$ELAN_HOME/bin:$PATH"
+# install the lean extension for code-server
+
+mkdir -p /opt/code-server/extensions
+/opt/tljh/user/bin/code-server --extensions-dir /opt/code-server/extensions \
+     --install-extension leanprover.lean4
+chmod -R a+rX /opt/code-server
+
+# adda config file telling user instances where to find the extensions
+
+cat <<EOF > /opt/tljh/config/jupyterhub_config.d/vscode.py
+c.Spawner.environment.update({
+    "CODE_EXTENSIONSDIR": "/opt/code-server/extensions",
+    "ELAN_HOME": "/opt/elan",
+})
 EOF
 
-cd /opt/lean
+# install elan system wide
 
-# install elan the lean installer
+mkdir -p /opt/elan
+curl -sSfL https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh \
+  | sudo env ELAN_HOME=/opt/elan sh -s -- -y --no-modify-path --default-toolchain none
+ln -s /opt/elan/bin/* /opt/tljh/user/bin/
 
-ELAN_HOME=/opt/lean bash -lc 'curl https://elan.lean-lang.org/elan-init.sh -sSf | sh -s -- --no-modify-path -y'
+# build a shared Mathlib project
 
-# add elan to the path
+export ELAN_HOME=/opt/elan
+mkdir -p /opt/lean && cd /opt/lean
+lake +leanprover-community/mathlib4:lean-toolchain new course math
+cd course
+lake exe cache get               # downloads prebuilt Mathlib, ~5 GB; much faster than building
+lake build Mathlib ProofWidgets  # should finish quickly if the cache worked
+chmod -R a+rX /opt/elan /opt/lean
+cd
 
-source /opt/lean/.elan/env
+# turn off restricted mode
 
-# now install lean4_jupyter
-
-# automatic istallation puts things in the wrong place
-# git clone https://github.com/utensil/lean4_jupyter.git && cd lean4_jupyter && ./scripts/prep.sh
-
-# need to do manual installation to use previously installed jupyterhub
-
-lean --version
-
-git clone https://github.com/utensil/lean4_jupyter.git
-
-git clone https://github.com/leanprover-community/repl
-
-cd repl
-
-lake build
-
-ln -s /opt/lean/repl/.lake/build/bin/repl $HOME/.elan/bin/repl
-
-#HOME=/root
-
-# cp -a /usr/local/share/jupyter/kernels/lean4 /opt/tljh/user/share/jupyter/kernels
-
-
-# Make Lean (elan) visible to notebook servers
-
-tee /opt/tljh/config/jupyterhub_config.d/lean.py >/dev/null <<'EOF'
-# Expose elan + Lean tools to all user servers
-c.Spawner.environment = {
-    "ELAN_HOME": "/opt/lean",
-    # Prepend elan shims so `lean`, `lake`, and (if present) `repl` are found
-    "PATH": "/opt/lean/bin:" + "${PATH}",
-}
+cat <<EOF > /etc/skel/.local/share/code-server/User/settings.json
+{ "security.workspace.trust.enabled": false }
 EOF
 
-#tljh-config reload
+# set default toolchain
 
+sudo env ELAN_HOME=/opt/elan elan default $(cat /opt/lean/course/lean-toolchain)
 
+# override git safety settings
 
-# make sure we have the previously installed pip in the path
-export PATH=/opt/tljh/user/bin:${PATH}
-
-sudo -E /opt/tljh/user/bin/python3 -m pip install --upgrade lean4_jupyter
-
-sudo -E /opt/tljh/user/bin/python3 -m lean4_jupyter.install --sys-prefix
-
+for d in /opt/lean/course/.lake/packages/*/; do
+  /bin/git config --system --add safe.directory "${d%/}"
+done
+/bin/git config --system --add safe.directory /opt/lean/course
 
 
