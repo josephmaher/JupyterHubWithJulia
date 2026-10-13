@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# from claude
+# from claude Opus 5.5
 
 # install code-server and vscode using conda
 
@@ -42,7 +42,7 @@ cd
 
 # turn off restricted mode
 
-cat <<EOF > /etc/skel/.local/share/code-server/User/settings.json
+cat <<'EOF' > /etc/skel/.local/share/code-server/User/settings.json
 { "security.workspace.trust.enabled": false }
 EOF
 
@@ -56,5 +56,17 @@ for d in /opt/lean/course/.lake/packages/*/; do
   /bin/git config --system --add safe.directory "${d%/}"
 done
 /bin/git config --system --add safe.directory /opt/lean/course
+
+# set up a project in /home/skel/
+
+mkdir -p /home/skel/lean/.lake
+cp /opt/lean/course/{lakefile.*,lean-toolchain,lake-manifest.json} /home/skel/lean/
+ln -s /opt/lean/course/.lake/packages /home/skel/lean/.lake/packages
+
+cat <<'EOF' > /home/skel/lean/Basic.lean
+import Mathlib
+def hello := "world"
+example (a b : ℕ) : a + b = b + a := by ring
+EOF
 
 
